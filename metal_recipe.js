@@ -509,9 +509,9 @@ ServerEvents.recipes(event => {
             `kubejs:${metal}_mold_stage`,
             `kubejs:${metal}_mold_stage_2`,
             fluid,
-            180,
+            90,
             output,
-            2
+            1
         )
     })
 
