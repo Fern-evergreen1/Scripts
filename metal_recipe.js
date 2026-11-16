@@ -1,13 +1,30 @@
+
 ServerEvents.recipes(event => {
 
-    event.remove({id: 'minecraft:iron_ingot_from_iron_block'})
-    event.remove({id:'iron_ingot_from_nuggets'})
-    event.remove({id:'minecraft:iron_nugget'})
-    event.remove({id:'minecraft:iron_block'})
-//-------------------------------------
+    // =====================================
+    // RECIPE REMOVALS
+    // =====================================
+
+    event.remove({ id: 'minecraft:iron_ingot_from_iron_block' })
+    event.remove({ id: 'minecraft:iron_ingot_from_nuggets' })
+    event.remove({ id: 'minecraft:iron_nugget' })
+    event.remove({ id: 'minecraft:iron_block' })
+
+    event.remove({ id: 'minecraft:gold_ingot_from_nuggets' })
+    event.remove({ id: 'minecraft:gold_block' })
+
+    event.remove({ id: 'create:crafting/materials/copper_ingot' })
+    event.remove({ id: 'minecraft:copper_block' })
+
+    event.remove({ id: 'create:crafting/materials/zinc_ingot_from_compacting' })
+    event.remove({ id: 'create:crafting/materials/zinc_block_from_compacting' })
+
+    event.remove({ id: 'create:crafting/materials/brass_ingot_from_compacting' })
+    event.remove({ id: 'create:crafting/materials/brass_block_from_compacting' })
+
 
     // =====================================
-    // METAL RECYCLING HELPER
+    // METAL MELTING HELPER
     // =====================================
 
     function addMetalMeltRecipe(item, fluid, amount) {
@@ -17,42 +34,67 @@ ServerEvents.recipes(event => {
         ).heated()
     }
 
-    // =====================================
-    // IRON MATERIALS
-    // =====================================
+    // Batch melting helper
+    function addBatchMeltRecipe(item, count, fluid, amount) {
+        event.recipes.create.mixing(
+            Fluid.of(fluid, amount),
+            [`${count}x ${item}`]
+        ).heated()
+    }
 
-    addMetalMeltRecipe('minecraft:iron_ingot', 'kubejs:molten_iron', 90)
-    addMetalMeltRecipe('minecraft:iron_nugget', 'kubejs:molten_iron', 10)
-    addMetalMeltRecipe('minecraft:iron_block', 'kubejs:molten_iron', 810)
-    addMetalMeltRecipe('minecraft:raw_iron', 'kubejs:molten_iron', 90)
-    //addMetalMeltRecipe('minecraft:raw_iron_block', 'kubejs:molten_iron', 810)
-    addMetalMeltRecipe('minecraft:iron_bars','kubejs:molten_iron', 33.75)
-    addMetalMeltRecipe('create:iron_sheet','kubejs:molten_iron',90)
 
     // =====================================
-    // GOLD MATERIALS
+    // METAL MATERIAL MELTING
     // =====================================
 
-    addMetalMeltRecipe('minecraft:gold_ingot', 'kubejs:molten_gold', 90)
-    addMetalMeltRecipe('minecraft:gold_nugget', 'kubejs:molten_gold', 10)
-    addMetalMeltRecipe('minecraft:gold_block', 'kubejs:molten_gold', 810)
-    addMetalMeltRecipe('minecraft:raw_gold', 'kubejs:molten_gold', 90)
-   // addMetalMeltRecipe('minecraft:raw_gold_block', 'kubejs:molten_gold', 810)
-    addMetalMeltRecipe('create:brass_sheet','kubejs:molten_brass',90)
-    addMetalMeltRecipe('createaddition:zinc_sheet','kubejs:molten_zinc',90)
+    const metalMaterials = [
+        // Iron
+        ['minecraft:iron_ingot', 'kubejs:molten_iron', 90],
+        ['minecraft:iron_nugget', 'kubejs:molten_iron', 10],
+        ['minecraft:iron_block', 'kubejs:molten_iron', 810],
+        ['minecraft:iron_bars', 'kubejs:molten_iron', 33.75],
+        ['create:iron_sheet', 'kubejs:molten_iron', 90],
+
+        // Gold
+        ['minecraft:gold_ingot', 'kubejs:molten_gold', 90],
+        ['minecraft:gold_nugget', 'kubejs:molten_gold', 10],
+        ['minecraft:gold_block', 'kubejs:molten_gold', 810],
+        ['create:golden_sheet', 'kubejs:molten_gold', 90],
+
+        // Copper
+        ['minecraft:copper_ingot', 'kubejs:molten_copper', 90],
+        ['create:copper_nugget', 'kubejs:molten_copper', 10],
+        ['minecraft:copper_block', 'kubejs:molten_copper', 810],
+        ['create:copper_sheet', 'kubejs:molten_copper', 90],
+
+        // Zinc
+        ['create:zinc_ingot', 'kubejs:molten_zinc', 90],
+        ['create:zinc_nugget', 'kubejs:molten_zinc', 10],
+        ['create:zinc_block', 'kubejs:molten_zinc', 810],
+        ['createaddition:zinc_sheet', 'kubejs:molten_zinc', 90],
+
+        // Brass
+        ['create:brass_ingot', 'kubejs:molten_brass', 90],
+        ['create:brass_nugget', 'kubejs:molten_brass', 10],
+        ['create:brass_block', 'kubejs:molten_brass', 810],
+        ['create:brass_sheet', 'kubejs:molten_brass', 90]
+    ]
+
+    metalMaterials.forEach(([item, fluid, amount]) => {
+        addMetalMeltRecipe(item, fluid, amount)
+    })
+
+    // 16 iron bars = 540 mB
+    addBatchMeltRecipe(
+        'minecraft:iron_bars',
+        16,
+        'kubejs:molten_iron',
+        540
+    )
+
 
     // =====================================
-    // COPPER MATERIALS
-    // =====================================
-
-    addMetalMeltRecipe('minecraft:copper_ingot', 'kubejs:molten_copper', 90)
-    addMetalMeltRecipe('minecraft:copper_block', 'kubejs:molten_copper', 810)
-    addMetalMeltRecipe('minecraft:raw_copper', 'kubejs:molten_copper', 90)
-   // addMetalMeltRecipe('minecraft:raw_copper_block', 'kubejs:molten_copper', 810)
-    addMetalMeltRecipe('create:copper_sheet','kubejs:molten_copper',90)
-
-    // =====================================
-    // DURABILITY RANGE HELPER
+    // EQUIPMENT DURABILITY INGREDIENT HELPER
     // =====================================
 
     function damageRange(item, minDamage, maxDamage) {
@@ -65,21 +107,22 @@ ServerEvents.recipes(event => {
         return Ingredient.of(variants)
     }
 
+
     // =====================================
     // EQUIPMENT RECYCLING HELPER
     // =====================================
 
     function addEquipment(item, fluid, maxDurability, fullYield) {
 
-        // 67-100% durability = 100% yield
-        let highMin = Math.ceil(maxDurability * 0.00)
+        // 0–33% damage: full yield
+        let highMin = 0
         let highMax = Math.floor(maxDurability * 0.33)
 
-        // 34-66% durability = 2/3 yield
+        // 34–66% damage: 2/3 yield
         let midMin = highMax + 1
         let midMax = Math.floor(maxDurability * 0.66)
 
-        // 1-33% durability = 1/3 yield
+        // 67–100% damage: 1/3 yield
         let lowMin = midMax + 1
         let lowMax = maxDurability - 1
 
@@ -99,79 +142,140 @@ ServerEvents.recipes(event => {
         ).heated()
     }
 
-    // =====================================
-    // IRON EQUIPMENT
-    // =====================================
-
-    const iron = 'kubejs:molten_iron'
-
-    addEquipment('minecraft:iron_sword', iron, 250, 180)
-    addEquipment('minecraft:iron_pickaxe', iron, 250, 270)
-    addEquipment('minecraft:iron_axe', iron, 250, 270)
-    addEquipment('minecraft:iron_shovel', iron, 250, 90)
-    addEquipment('minecraft:iron_hoe', iron, 250, 180)
-    addEquipment('minecraft:shears', iron, 238, 180)
-
-    addEquipment('minecraft:iron_helmet', iron, 165, 450)
-    addEquipment('minecraft:iron_chestplate', iron, 240, 720)
-    addEquipment('minecraft:iron_leggings', iron, 225, 630)
-    addEquipment('minecraft:iron_boots', iron, 195, 360)
 
     // =====================================
-    // GOLD EQUIPMENT
+    // EQUIPMENT CONFIGURATION
     // =====================================
 
-    const gold = 'kubejs:molten_gold'
+    const equipmentSets = [
 
-    addEquipment('minecraft:golden_sword', gold, 32, 180)
-    addEquipment('minecraft:golden_pickaxe', gold, 32, 270)
-    addEquipment('minecraft:golden_axe', gold, 32, 270)
-    addEquipment('minecraft:golden_shovel', gold, 32, 90)
-    addEquipment('minecraft:golden_hoe', gold, 32, 180)
+        // IRON TOOLS
+        {
+            fluid: 'kubejs:molten_iron',
+            items: [
+                ['minecraft:iron_sword', 250, 180],
+                ['minecraft:iron_pickaxe', 250, 270],
+                ['minecraft:iron_axe', 250, 270],
+                ['minecraft:iron_shovel', 250, 90],
+                ['minecraft:iron_hoe', 250, 180],
+                ['minecraft:shears', 238, 180]
+            ]
+        },
 
-    addEquipment('minecraft:golden_helmet', gold, 77, 450)
-    addEquipment('minecraft:golden_chestplate', gold, 112, 720)
-    addEquipment('minecraft:golden_leggings', gold, 105, 630)
-    addEquipment('minecraft:golden_boots', gold, 91, 360)
+        // IRON ARMOR
+        {
+            fluid: 'kubejs:molten_iron',
+            items: [
+                ['minecraft:iron_helmet', 165, 450],
+                ['minecraft:iron_chestplate', 240, 720],
+                ['minecraft:iron_leggings', 225, 630],
+                ['minecraft:iron_boots', 195, 360]
+            ]
+        },
+
+        // GOLD TOOLS
+        {
+            fluid: 'kubejs:molten_gold',
+            items: [
+                ['minecraft:golden_sword', 32, 180],
+                ['minecraft:golden_pickaxe', 32, 270],
+                ['minecraft:golden_axe', 32, 270],
+                ['minecraft:golden_shovel', 32, 90],
+                ['minecraft:golden_hoe', 32, 180]
+            ]
+        },
+
+        // GOLD ARMOR
+        {
+            fluid: 'kubejs:molten_gold',
+            items: [
+                ['minecraft:golden_helmet', 77, 450],
+                ['minecraft:golden_chestplate', 112, 720],
+                ['minecraft:golden_leggings', 105, 630],
+                ['minecraft:golden_boots', 91, 360]
+            ]
+        },
+
+        // COPPER TOOLS
+        {
+            fluid: 'kubejs:molten_copper',
+            items: [
+                ['create_sa:copper_sword', 130, 180],
+                ['create_sa:copper_pickaxe', 131, 270],
+                ['create_sa:copper_axe', 130, 270],
+                ['create_sa:copper_shovel', 130, 90],
+                ['create_sa:copper_hoe', 130, 180]
+            ]
+        },
+
+        // COPPER ARMOR
+        {
+            fluid: 'kubejs:molten_copper',
+            items: [
+                ['create_sa:copper_helmet', 165, 450],
+                ['create_sa:copper_chestplate', 240, 720],
+                ['create_sa:copper_leggings', 225, 630],
+                ['create_sa:copper_boots', 195, 360]
+            ]
+        },
+
+        // ZINC TOOLS
+        {
+            fluid: 'kubejs:molten_zinc',
+            items: [
+                ['create_sa:zinc_sword', 250, 180],
+                ['create_sa:zinc_pickaxe', 250, 270],
+                ['create_sa:zinc_axe', 250, 270],
+                ['create_sa:zinc_shovel', 250, 90],
+                ['create_sa:zinc_hoe', 250, 180]
+            ]
+        },
+
+        // ZINC ARMOR
+        {
+            fluid: 'kubejs:molten_zinc',
+            items: [
+                ['create_sa:zinc_helmet', 220, 450],
+                ['create_sa:zinc_chestplate', 320, 720],
+                ['create_sa:zinc_leggings', 300, 630],
+                ['create_sa:zinc_boots', 260, 360]
+            ]
+        },
+
+        // BRASS TOOLS
+        {
+            fluid: 'kubejs:molten_brass',
+            items: [
+                ['create_sa:brass_sword', 450, 180],
+                ['create_sa:brass_pickaxe', 450, 270],
+                ['create_sa:brass_axe', 450, 270],
+                ['create_sa:brass_shovel', 450, 90],
+                ['create_sa:brass_hoe', 450, 180]
+            ]
+        },
+
+        // BRASS ARMOR
+        {
+            fluid: 'kubejs:molten_brass',
+            items: [
+                ['create_sa:brass_helmet', 275, 450],
+                ['create_sa:brass_chestplate', 400, 720],
+                ['create_sa:brass_leggings', 375, 630],
+                ['create_sa:brass_boots', 325, 360]
+            ]
+        }
+    ]
+
+    equipmentSets.forEach(set => {
+        set.items.forEach(([item, durability, yieldAmount]) => {
+            addEquipment(item, set.fluid, durability, yieldAmount)
+        })
+    })
+
 
     // =====================================
-    // COPPER EQUIPMENT
+    // LIMESTONE AND FLUX PRODUCTION
     // =====================================
-
-    const copper = 'kubejs:molten_copper'
-    addEquipment('create_sa:copper_pickaxe', copper, 131, 270)
-
-    // ZINC — Tools: 250 durability
-    const zinc = 'kubejs:molten_zinc'
-
-    addEquipment('create_sa:zinc_sword', zinc, 250, 180)
-    addEquipment('create_sa:zinc_pickaxe', zinc, 250, 270)
-    addEquipment('create_sa:zinc_axe', zinc, 250, 270)
-    addEquipment('create_sa:zinc_shovel', zinc, 250, 90)
-    addEquipment('create_sa:zinc_hoe', zinc, 250, 180)
-
-    // Zinc armor: helmet, chestplate, leggings, boots
-    addEquipment('create_sa:zinc_helmet', zinc, 220, 450)
-    addEquipment('create_sa:zinc_chestplate', zinc, 320, 720)
-    addEquipment('create_sa:zinc_leggings', zinc, 300, 630)
-    addEquipment('create_sa:zinc_boots', zinc, 260, 360)
-
-    // BRASS — Tools: 450 durability
-    const brass = 'kubejs:molten_brass'
-
-    addEquipment('create_sa:brass_sword', brass, 450, 180)
-    addEquipment('create_sa:brass_pickaxe', brass, 450, 270)
-    addEquipment('create_sa:brass_axe', brass, 450, 270)
-    addEquipment('create_sa:brass_shovel', brass, 450, 90)
-    addEquipment('create_sa:brass_hoe', brass, 450, 180)
-
-    // Brass armor: helmet, chestplate, leggings, boots
-    addEquipment('create_sa:brass_helmet', brass, 275, 450)
-    addEquipment('create_sa:brass_chestplate', brass, 400, 720)
-    addEquipment('create_sa:brass_leggings', brass, 375, 630)
-    addEquipment('create_sa:brass_boots', brass, 325, 360)
-
-    //-------------------------------------
 
     event.recipes.create.mixing(
         '1x create:limestone',
@@ -182,9 +286,7 @@ ServerEvents.recipes(event => {
     ).heated()
 
     event.recipes.create.crushing(
-        [
-            '2x kubejs:lime_powder'
-        ],
+        ['2x kubejs:lime_powder'],
         'create:limestone'
     )
 
@@ -196,85 +298,70 @@ ServerEvents.recipes(event => {
         ]
     )
 
-    event.recipes.create.mixing(
-        Fluid.of('kubejs:molten_iron', 180),
-        [
-            'minecraft:raw_iron',
-            'kubejs:flux_powder'
-        ]
-    ).heated()
 
-    event.recipes.create.mixing(
-        Fluid.of('kubejs:molten_zinc', 180),
-        [
-            'create:raw_zinc',
-            'kubejs:flux_powder'
-        ]
-    ).heated()
+    // =====================================
+    // RAW ORE + FLUX PROCESSING
+    // =====================================
 
-    event.recipes.create.mixing(
-        Fluid.of('kubejs:molten_iron', 180),
-        [
-            'create:crushed_raw_iron',
-            'kubejs:flux_powder'
-        ]
-    ).heated()
+    function addFluxOreRecipes(raw, crushed, block, fluid) {
 
-    event.recipes.create.mixing(
-        Fluid.of('kubejs:molten_iron', 1620),
-        [
-            'minecraft:raw_iron_block',
-            'kubejs:flux_powder',
-            'kubejs:flux_powder',
-            'kubejs:flux_powder'
-        ]
-    ).heated()
+        // Raw ore
+        event.recipes.create.mixing(
+            Fluid.of(fluid, 180),
+            [raw, 'kubejs:flux_powder']
+        ).heated()
 
-    event.recipes.create.mixing(
-        Fluid.of('kubejs:molten_gold', 1620),
-        [
-            'minecraft:raw_gold_block',
-            'kubejs:flux_powder',
-            'kubejs:flux_powder',
-            'kubejs:flux_powder'
-        ]
-    ).heated()
+        // Crushed raw ore
+        event.recipes.create.mixing(
+            Fluid.of(fluid, 180),
+            [crushed, 'kubejs:flux_powder']
+        ).heated()
 
-    event.recipes.create.mixing(
-        Fluid.of('kubejs:molten_copper', 1620),
-        [
-            'minecraft:raw_copper_block',
-            'kubejs:flux_powder',
-            'kubejs:flux_powder',
-            'kubejs:flux_powder'
-        ]
-    ).heated()
+        // Raw ore block
+        event.recipes.create.mixing(
+            Fluid.of(fluid, 1620),
+            [
+                block,
+                '3x kubejs:flux_powder'
+            ]
+        ).heated()
+    }
 
-    event.recipes.create.mixing(
-        Fluid.of('kubejs:molten_zinc', 1620),
-        [
-            'create:raw_zinc_block',
-            'kubejs:flux_powder',
-            'kubejs:flux_powder',
-            'kubejs:flux_powder'
-        ]
-    ).heated()
+    addFluxOreRecipes(
+        'minecraft:raw_iron',
+        'create:crushed_raw_iron',
+        'minecraft:raw_iron_block',
+        'kubejs:molten_iron'
+    )
 
-    event.recipes.create.mixing(
-        Fluid.of('kubejs:molten_gold', 180),
-        [
-            'create:crushed_raw_gold',
-            'kubejs:flux_powder'
-        ]
-    ).heated()
+    addFluxOreRecipes(
+        'minecraft:raw_gold',
+        'create:crushed_raw_gold',
+        'minecraft:raw_gold_block',
+        'kubejs:molten_gold'
+    )
 
-    event.recipes.create.mixing(
-        Fluid.of('kubejs:molten_copper', 180),
-        [
-            'create:crushed_raw_copper',
-            'kubejs:flux_powder'
-        ]
-    ).heated()
+    addFluxOreRecipes(
+        'minecraft:raw_copper',
+        'create:crushed_raw_copper',
+        'minecraft:raw_copper_block',
+        'kubejs:molten_copper'
+    )
+
+    addFluxOreRecipes(
+        'create:raw_zinc',
+        'create:crushed_raw_zinc',
+        'create:raw_zinc_block',
+        'kubejs:molten_zinc'
+    )
+
+
+    // =====================================
+    // ALLOY RECIPES
+    // =====================================
+
+    // Bronze
+    event.remove({ id: 'petrochem:mixing/bronze_alloy' })
 
     event.recipes.create.mixing(
         'petrochem:bronze_ingot',
@@ -284,33 +371,7 @@ ServerEvents.recipes(event => {
         ]
     ).heated()
 
-    event.remove({id:'petrochem:mixing/bronze_alloy'})
-
-    event.recipes.create.mixing(
-        Fluid.of('kubejs:molten_zinc', 180),
-        [
-            'create:crushed_raw_zinc',
-            'kubejs:flux_powder'
-        ]
-    ).heated()
-
-    event.recipes.create.mixing(
-        Fluid.of('kubejs:molten_gold', 180),
-        [
-            'minecraft:raw_gold',
-            'kubejs:flux_powder'
-        ]
-    ).heated()
-
-    event.recipes.create.mixing(
-        Fluid.of('kubejs:molten_copper', 180),
-        [
-            'minecraft:raw_copper',
-            'kubejs:flux_powder'
-        ]
-    ).heated()
-
-    // Duplicate create:raw_zinc + flux_powder -> 180 mB molten zinc recipe removed.
+    // Brass
     event.recipes.create.mixing(
         Fluid.of('kubejs:molten_brass', 270),
         [
@@ -319,6 +380,7 @@ ServerEvents.recipes(event => {
         ]
     ).heated()
 
+    // Andesite alloy
     event.recipes.create.mixing(
         Fluid.of('kubejs:molten_andesite_alloy', 90),
         [
@@ -328,6 +390,11 @@ ServerEvents.recipes(event => {
         ]
     ).heated()
 
+
+    // =====================================
+    // MOLD CRAFTING
+    // =====================================
+
     event.recipes.create.compacting(
         'kubejs:ingot_mold',
         [
@@ -335,128 +402,46 @@ ServerEvents.recipes(event => {
             [
                 'minecraft:iron_ingot',
                 'minecraft:copper_ingot',
-                'minecraft:gold_ingot'
+                'minecraft:gold_ingot',
+                'create:zinc_ingot',
+                'create:brass_ingot'
             ]
         ]
     )
 
-    event.recipes.create.sequenced_assembly(
-        ['kubejs:iron_mold_stage_2'],
-        'kubejs:ingot_mold',
+    event.recipes.create.compacting(
+        'kubejs:block_mold',
         [
-            // First: Fill the mold
-            event.recipes.create.filling(
-                'kubejs:iron_mold_stage',
-                [
-                    'kubejs:ingot_mold',
-                    Fluid.of('kubejs:molten_iron', 180)
-                ]
-            ),
-
-            // Second: First press
-            event.recipes.create.pressing(
-                'kubejs:iron_mold_stage',
-                'kubejs:iron_mold_stage'
-            ),
-
-            // Third: Second press
-            event.recipes.create.pressing(
-                'kubejs:iron_mold_stage',
-                'kubejs:iron_mold_stage'
-            )
+            'minecraft:clay',
+            [
+                'minecraft:iron_block',
+                'minecraft:copper_block',
+                'minecraft:gold_block',
+                'create:zinc_block',
+                'create:brass_block'
+            ]
         ]
     )
-        .transitionalItem('kubejs:iron_mold_stage')
-        .loops(1)
 
-    // Final iron casting press
-    event.recipes.create.pressing(
+    event.recipes.create.compacting(
+        'kubejs:nugget_mold',
         [
-            Item.of('minecraft:iron_ingot', 2),
-            'kubejs:ingot_mold'
-        ],
-        'kubejs:iron_mold_stage_2'
-    )
-
-    // COPPER CASTING
-    event.recipes.create.sequenced_assembly(
-        ['kubejs:copper_mold_stage_2'],
-        'kubejs:ingot_mold',
-        [
-            // Fill with molten copper
-            event.recipes.create.filling(
-                'kubejs:copper_mold_stage',
-                [
-                    'kubejs:ingot_mold',
-                    Fluid.of('kubejs:molten_copper', 180)
-                ]
-            ),
-
-            // First press
-            event.recipes.create.pressing(
-                'kubejs:copper_mold_stage',
-                'kubejs:copper_mold_stage'
-            ),
-
-            // Second press
-            event.recipes.create.pressing(
-                'kubejs:copper_mold_stage',
-                'kubejs:copper_mold_stage'
-            )
+            'minecraft:clay_ball',
+            [
+                'minecraft:iron_nugget',
+                'minecraft:gold_nugget',
+                'create:copper_nugget',
+                'create:zinc_nugget',
+                'create:brass_nugget'
+            ]
         ]
     )
-        .transitionalItem('kubejs:copper_mold_stage')
-        .loops(1)
 
-    // Final copper press
-    event.recipes.create.pressing(
-        [
-            Item.of('minecraft:copper_ingot', 2),
-            'kubejs:ingot_mold'
-        ],
-        'kubejs:copper_mold_stage_2'
-    )
 
-    // GOLD CASTING
-    event.recipes.create.sequenced_assembly(
-        ['kubejs:gold_mold_stage_2'],
-        'kubejs:ingot_mold',
-        [
-            // Fill with molten gold
-            event.recipes.create.filling(
-                'kubejs:gold_mold_stage',
-                [
-                    'kubejs:ingot_mold',
-                    Fluid.of('kubejs:molten_gold', 180)
-                ]
-            ),
+    // =====================================
+    // GENERIC METAL CASTING HELPER
+    // =====================================
 
-            // First press
-            event.recipes.create.pressing(
-                'kubejs:gold_mold_stage',
-                'kubejs:gold_mold_stage'
-            ),
-
-            // Second press
-            event.recipes.create.pressing(
-                'kubejs:gold_mold_stage',
-                'kubejs:gold_mold_stage'
-            )
-        ]
-    )
-        .transitionalItem('kubejs:gold_mold_stage')
-        .loops(1)
-
-    // Final gold press
-    event.recipes.create.pressing(
-        [
-            Item.of('minecraft:gold_ingot', 2),
-            'kubejs:ingot_mold'
-        ],
-        'kubejs:gold_mold_stage_2'
-    )
-
-    // METAL CASTING RECIPE GENERATOR
     function addMetalCasting(
         mold,
         stage,
@@ -492,10 +477,10 @@ ServerEvents.recipes(event => {
                 )
             ]
         )
-            .transitionalItem(Item.of(stage))
-            .loops(1)
+        .transitionalItem(Item.of(stage))
+        .loops(1)
 
-        // Final press: output + reusable mold
+        // Final press returns the mold
         event.recipes.create.pressing(
             [
                 Item.of(output, outputCount),
@@ -505,88 +490,94 @@ ServerEvents.recipes(event => {
         )
     }
 
-    // IRON NUGGETS
-    addMetalCasting(
-        'kubejs:nugget_mold',
-        'kubejs:iron_nugget_mold_stage',
-        'kubejs:iron_nugget_mold_stage_2',
-        'kubejs:molten_iron',
-        10,
-        'minecraft:iron_nugget',
-        1
-    )
 
-    // COPPER NUGGETS
-    addMetalCasting(
-        'kubejs:nugget_mold',
-        'kubejs:copper_nugget_mold_stage',
-        'kubejs:copper_nugget_mold_stage_2',
-        'kubejs:molten_copper',
-        10,
-        'create:copper_nugget',
-        1
-    )
+    // =====================================
+    // INGOT CASTING
+    // =====================================
 
-    // GOLD NUGGETS
-    addMetalCasting(
-        'kubejs:nugget_mold',
-        'kubejs:gold_nugget_mold_stage',
-        'kubejs:gold_nugget_mold_stage_2',
-        'kubejs:molten_gold',
-        10,
-        'minecraft:gold_nugget',
-        1
-    )
+    const ingotCasting = [
+        ['iron', 'kubejs:molten_iron', 'minecraft:iron_ingot'],
+        ['copper', 'kubejs:molten_copper', 'minecraft:copper_ingot'],
+        ['gold', 'kubejs:molten_gold', 'minecraft:gold_ingot'],
+        ['zinc', 'kubejs:molten_zinc', 'create:zinc_ingot'],
+        ['brass', 'kubejs:molten_brass', 'create:brass_ingot']
+    ]
 
-    // IRON BLOCKS
-    addMetalCasting(
-        'kubejs:block_mold',
-        'kubejs:iron_block_mold_stage',
-        'kubejs:iron_block_mold_stage_2',
-        'kubejs:molten_iron',
-        810,
-        'minecraft:iron_block',
-        1
-    )
+    ingotCasting.forEach(([metal, fluid, output]) => {
+        addMetalCasting(
+            'kubejs:ingot_mold',
+            `kubejs:${metal}_mold_stage`,
+            `kubejs:${metal}_mold_stage_2`,
+            fluid,
+            180,
+            output,
+            2
+        )
+    })
 
-    // COPPER BLOCKS
-    addMetalCasting(
-        'kubejs:block_mold',
-        'kubejs:copper_block_mold_stage',
-        'kubejs:copper_block_mold_stage_2',
-        'kubejs:molten_copper',
-        810,
-        'minecraft:copper_block',
-        1
-    )
 
-    // GOLD BLOCKS
-    addMetalCasting(
-        'kubejs:block_mold',
-        'kubejs:gold_block_mold_stage',
-        'kubejs:gold_block_mold_stage_2',
-        'kubejs:molten_gold',
-        810,
-        'minecraft:gold_block',
-        1
-    )
+    // =====================================
+    // NUGGET CASTING
+    // =====================================
+
+    const nuggetCasting = [
+        ['iron', 'kubejs:molten_iron', 'minecraft:iron_nugget'],
+        ['copper', 'kubejs:molten_copper', 'create:copper_nugget'],
+        ['gold', 'kubejs:molten_gold', 'minecraft:gold_nugget'],
+        ['zinc', 'kubejs:molten_zinc', 'create:zinc_nugget'],
+        ['brass', 'kubejs:molten_brass', 'create:brass_nugget']
+    ]
+
+    nuggetCasting.forEach(([metal, fluid, output]) => {
+        addMetalCasting(
+            'kubejs:nugget_mold',
+            `kubejs:${metal}_nugget_mold_stage`,
+            `kubejs:${metal}_nugget_mold_stage_2`,
+            fluid,
+            10,
+            output,
+            1
+        )
+    })
+
+
+    // =====================================
+    // BLOCK CASTING
+    // =====================================
+
+    const blockCasting = [
+        ['iron', 'kubejs:molten_iron', 'minecraft:iron_block'],
+        ['copper', 'kubejs:molten_copper', 'minecraft:copper_block'],
+        ['gold', 'kubejs:molten_gold', 'minecraft:gold_block'],
+        ['zinc', 'kubejs:molten_zinc', 'create:zinc_block'],
+        ['brass', 'kubejs:molten_brass', 'create:brass_block']
+    ]
+
+    blockCasting.forEach(([metal, fluid, output]) => {
+        addMetalCasting(
+            'kubejs:block_mold',
+            `kubejs:${metal}_block_mold_stage`,
+            `kubejs:${metal}_block_mold_stage_2`,
+            fluid,
+            810,
+            output,
+            1
+        )
+    })
+
+
+    // =====================================
+    // ANDESITE ALLOY CASTING
+    // =====================================
 
     addMetalCasting(
         'kubejs:ingot_mold',
         'kubejs:andesite_mold_stage',
         'kubejs:andesite_mold_stage_2',
         'kubejs:molten_andesite_alloy',
-        90,
+        180,
         'create:andesite_alloy',
-        1
+        2
     )
 
-    event.remove({id:'gold_ingot_from_nuggets'})
-    event.remove({id:'gold_block'})
-    event.remove({id:'create:crafting/materials/copper_ingot'})
-    event.remove({id:'minecraft:copper_block'})
-    event.remove({id:'create:crafting/materials/zinc_ingot_from_compacting'})
-    event.remove({id:'create:crafting/materials/zinc_block_from_compacting'})
-    event.remove({id:'create:crafting/materials/brass_ingot_from_compacting'})
-    event.remove({id:'create:crafting/materials/brass_block_from_compacting'})
 })
