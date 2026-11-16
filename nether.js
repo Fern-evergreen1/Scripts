@@ -24,16 +24,18 @@ ServerEvents.recipes(event => {
         ]
     )
 
-    event.recipes.create.mixing(
-        'minecraft:basalt',
+   event.recipes.create.mixing(
+       [ 'minecraft:basalt',
+        'minecraft:blue_ice',
+            Fluid.of('minecraft:lava', 500),
+            'minecraft:soul_soil'
+        ],
         [
             'minecraft:blue_ice',
             Fluid.of('minecraft:lava', 500),
             'minecraft:soul_soil'
         ]
     )
-        .keepIngredient('minecraft:blue_ice')
-        .keepIngredient('minecraft:soul_soil')
 
     event.recipes.summoningrituals.altar("minecraft:flint_and_steel")
         .itemInputs([
